@@ -1,0 +1,18 @@
+/* Reset CSS básico para remover margins, paddings e estilos padrão */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Remover estilos padrão de listas */
+ul,
+ol,
+li {
+  list-style: none;
+}
+
+

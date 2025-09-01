@@ -1,0 +1,151 @@
+.container {
+    min-height: 100vh;
+    background-color: #f9fafb;
+    padding: 1rem;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  
+  .teamHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .teamBadge {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+  
+  .statusBadge {
+    width: max-content;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  
+  .bgGreen {
+    background-color: oklch(92.5% 0.084 155.995);
+    color: oklch(62.7% 0.194 149.214);
+  }
+  
+  .bgRed {
+    background-color: #ef4444;
+    color: white;
+  }
+  
+  .bgBlue {
+    background-color:oklch(88.2% 0.059 254.128);
+    color: oklch(54.6% 0.245 262.881);
+  }
+  
+  .bgYellow {
+    background-color:oklch(94.5% 0.129 101.54);
+    color:oklch(68.1% 0.162 75.834);
+  }
+  
+  .bgGray {
+    background-color:oklch(92.9% 0.013 255.508);
+    color:oklch(44.6% 0.03 256.802);
+  }
+  
+  .card {
+    background-color: white;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .cardTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .infoGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  @media (min-width: 768px) {
+    .infoGrid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  .label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.25rem;
+  }
+  
+  .value {
+    color: #4b5563;
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+  }
+  
+  .table thead {
+    background-color: #f3f4f6;
+  }
+  
+  .table th {
+    text-align: left;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .table td {
+    padding: 0.75rem 0.5rem;
+    border-top: 1px solid #e5e7eb;
+    color: #4b5563;
+  }
+  
+  .table tr:hover {
+    background-color: #f9fafb;
+  }
+  
+  .emptyRow {
+    text-align: center;
+    padding: 1rem;
+    color: #6b7280;
+    font-style: italic;
+  }
+  
+  .loading {
+    padding: 1.5rem;
+    text-align: center;
+    color: #6b7280;
+  }
+  
+  .error {
+    padding: 1.5rem;
+    color: #ef4444;
+  }
+  
+  .button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+  }
