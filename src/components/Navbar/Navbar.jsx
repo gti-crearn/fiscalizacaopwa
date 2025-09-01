@@ -6,6 +6,7 @@ import { useContext, useState } from "react";
 import styles from "./Navbar.module.css";
 import { SiGooglemaps } from "react-icons/si";
 import { DataContext } from "../../context/DataContext";
+import UserDropdown from "../UserDropdown/UserDropdown";
 
 
 export default function Navbar() {
@@ -50,8 +51,7 @@ export default function Navbar() {
 
         {/* Usuário (Desktop) */}
         <div className={styles.userMenu}>
-          <FaUserCircle />
-          {user?.name || "Usuário"} ▾
+           <UserDropdown username={user?.name} />
         </div>
 
         {/* Botão Mobile */}
@@ -83,7 +83,7 @@ export default function Navbar() {
             <FaTachometerAlt /> Dashboard
           </Link>
           <div className={styles.userMenu}>
-            <FaUserCircle /> {user?.name || "Usuário"} ▾
+            <UserDropdown username={user?.name} />
           </div>
         </div>
       )}
