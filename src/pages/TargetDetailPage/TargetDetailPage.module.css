@@ -52,18 +52,19 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     margin-bottom: 1.5rem;
     overflow: hidden;
+    padding: 1rem;
   }
   
   .header {
     padding: 1rem;
     background-color: #f9fafb;
     border-bottom: 1px solid #e5e7eb;
-    display: flex;
-    align-items: center;
+    display: flex;    
     gap: 0.5rem;
     font-size: 1.125rem;
     font-weight: 600;
     color: #1f2937;
+    border-radius: 5px;
   }
   
   .icon {
@@ -75,6 +76,9 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 1rem;
+    border: 1px solid oklch(87.2% 0.01 258.338);
+    margin-top: 1rem;
+    border-radius: 5px;
   }
   
   @media (min-width: 768px) {
@@ -182,5 +186,7 @@
   .groupButton{
     display: flex;
     align-items: center;
+    justify-content: end;
     gap: 0.5rem;
+    margin-top: 1rem;
   }

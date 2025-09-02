@@ -1,5 +1,5 @@
 "use client";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { SiGooglemaps } from "react-icons/si";
 import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import styles from "./TargetTable.module.css";
@@ -8,20 +8,34 @@ import { DataContext } from "../../../../context/DataContext";
 import { ButtonComponent } from "../../../../components/Button/Button";
 import { formatCNPJ } from "../../../../utils/formatDate";
 import { useAuth } from "../../../../context/AuthContext";
+import { Modal } from "../../../../components/Modal/Modal";
+import EditTargetForm from "../../../Fiscalizacoes/components/EditTargetForm/EditTargetForm";
 
 export default function TableTarget() {
-  const { userData } = useContext(DataContext);
+  const { userData, teams } = useContext(DataContext);
   const { user } = useAuth()
   const navigate = useNavigate();
   const [loading] = useState(false); // Simulando loading (pode vir do contexto)
-
-
-  // ✅ usar query string com react-router
+  const [isCoordinator, setIsCoordinator] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("q") || "");
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectTargetEdit, setSelectTargetEdit] = useState(null)
 
-  // Extrai todos os targets das equipes do usuário
   const allTargets = userData[0]?.teams?.flatMap(team => team.targets) || [];
+
+  const handleUserCoordinatorTeam = () => {
+    // Recuperar id do primeiro team
+    const idTeam = allTargets[0]?.teamId;
+    const findTeamData = teams.find((team) => team?.id === idTeam);
+    const userCoordinatorTeam = findTeamData?.coordinatorId === user?.id;
+    return !!userCoordinatorTeam;
+  };
+  useEffect(() => {
+    const result = handleUserCoordinatorTeam();
+    setIsCoordinator(result);
+  }, [allTargets, teams, user]);
 
   const handleOpenMap = () => {
     // Salva os alvos no sessionStorage
@@ -60,14 +74,36 @@ export default function TableTarget() {
     });
   }, [allTargets, search]);
 
+
+  const handleReallocate = (target) => {
+    setIsModalOpen(true)
+    setSelectTargetEdit(target)
+
+  };
+
+  console.log(isCoordinator)
+
+  //Acompanhar mudança de estado da conexão
+  useEffect(() => {
+    const updateStatus = () => setIsOnline(navigator.onLine);
+    window.addEventListener("online", updateStatus);
+    window.addEventListener("offline", updateStatus);
+    return () => {
+      window.removeEventListener("online", updateStatus);
+      window.removeEventListener("offline", updateStatus);
+    };
+  }, []);
+
   return (
     <div className={styles.container}>
+     
 
       <div className={styles.card}>
         {/* Botão para abrir mapa */}
         <div className={styles.header}>
-          {userData[0]?.teams.length > 0 && (
-            <span>{`Bem-vindo, ${user?.name}! Você está na equipe ${userData[0]?.teams[0]?.name}`} </span>
+          {!isOnline && (
+            // <span>{`Bem-vindo, ${user?.name}! Você está na equipe ${userData[0]?.teams[0]?.name}`} </span>
+            <span>Você está trabalhando Online, os dados serão guardados e sincronizados quando hover uma conexão </span>
           )}
 
           <ButtonComponent
@@ -189,8 +225,9 @@ export default function TableTarget() {
                           </NavLink>
                           <button
                             onClick={() => handleReallocate(target)}
+                            title={isCoordinator && isOnline ? "Editar" : "Edição apenas Online e Coordenador"}
                             className={styles.actionButton}
-                            title="Editar"
+                            disabled={!isCoordinator && isOnline || !isOnline}
                           >
                             <FiEdit3 size={16} />
                           </button>
@@ -210,6 +247,19 @@ export default function TableTarget() {
             </tbody>
           </table>
         </div>
+
+        {/* Modal de edição de um alvo */}
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <EditTargetForm
+            target={selectTargetEdit}
+            onSuccess={() => {
+              alert("Alvo atualizado com sucesso!");
+              //refetchTargets(); // Atualiza a lista
+              //setIsEditing(false);
+            }}
+            onCancel={() => setIsModalOpen(false)}
+          />
+        </Modal>
       </div>
     </div>
   );

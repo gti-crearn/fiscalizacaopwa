@@ -21,7 +21,7 @@ export function TargetTable({ onSelectionChange }) {
     status: "",
   });
 
-  console.log(selectTargetEdit, "Dados para edição")
+ 
   // Sincroniza filtros locais com os do contexto
   useEffect(() => {
     setLocalFilters({
@@ -156,6 +156,11 @@ export function TargetTable({ onSelectionChange }) {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <EditTargetForm
           target={selectTargetEdit}
+          onSuccess={() => {
+            alert("Alvo atualizado com sucesso!");
+            //refetchTargets(); // Atualiza a lista
+            //setIsEditing(false);
+          }}
           onCancel={() => setIsModalOpen(false)}
         />
       </Modal>
@@ -275,7 +280,7 @@ export function TargetTable({ onSelectionChange }) {
                         <button
                           onClick={() => handleReallocate(target)}
                           className={styles.actionButton}
-                          title="Editar"
+                          title="Editar"                         
                         >
                           <FiEdit3 size={16} />
                         </button>
@@ -299,3 +304,5 @@ export function TargetTable({ onSelectionChange }) {
     </div>
   );
 }
+
+

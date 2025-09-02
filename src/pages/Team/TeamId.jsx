@@ -1,19 +1,22 @@
 import { useEffect, useState, useContext } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import { LuUsers } from "react-icons/lu";
-import { IoIosList, IoMdPersonAdd } from "react-icons/io";
+import { IoIosList, IoMdAddCircleOutline, IoMdPersonAdd } from "react-icons/io";
 import { CiViewList } from "react-icons/ci";
 import { IoInformationCircleOutline } from "react-icons/io5";
-import { FaRegUser } from "react-icons/fa";
+import { FaEdit, FaRegUser } from "react-icons/fa";
 
 import styles from "./TeamId.module.css";
 import { Modal } from "../../components/Modal/Modal";
 import { ButtonComponent } from "../../components/Button/Button";
 import { AddUsersToTeamForm } from "./components/AddUsersToTeamForm/AddUsersToTeamForm";
 import { DataContext } from "../../context/DataContext"; // ✅ Importe o contexto
-import { FiEye } from "react-icons/fi";
+import { FiEdit, FiEdit3, FiEye } from "react-icons/fi";
 import { formatCNPJ } from "../../utils/formatDate";
 import { ButtonLink } from "../../components/Link/Link";
+import { AssignCoordinator } from "./components/AssignCoordinator/AssignCoordinator";
+import EditTargetForm from "../Fiscalizacoes/components/EditTargetForm/EditTargetForm";
+
 
 export default function TeamPage() {
   const { id } = useParams();
@@ -21,11 +24,18 @@ export default function TeamPage() {
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isModalOpenEditTarget, setIsModalOpenEditTarget] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenCoordinator, setIsModalOpenCoordinator] = useState(false);
+  const [selectTargetEdit, setSelectTargetEdit] = useState(null)
+
+  console.log(selectTargetEdit)
 
   const handleCancel = () => {
     setIsModalOpen(false);
   };
+  //recuperar o nome usuario coodenador da equipe
+  const coodinatorTeam = team?.users.find((user) => user.id === team?.coordinatorId)
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString("pt-BR", {
@@ -85,6 +95,12 @@ export default function TeamPage() {
     return <p className={styles.loading}>Equipe não encontrada.</p>;
   }
 
+  const handleReallocate = (target) => {
+    setIsModalOpenEditTarget(true)
+    setSelectTargetEdit(target)
+
+  };
+
   return (
     <div className={styles.container}>
       {/* Nome da Equipe */}
@@ -141,6 +157,20 @@ export default function TeamPage() {
             <p className={styles.label}>Última atualização:</p>
             <p className={styles.value}>{formatDate(team.updatedAt)}</p>
           </div>
+          <div>
+            <p className={styles.label}>
+              Coordenador:
+              <button
+                className={styles.buttonCoordinator}
+                onClick={() => setIsModalOpenCoordinator(true)}>
+                {!team.coordinatorId ? <IoMdAddCircleOutline size={20} title="Definir coordenador" /> : <FiEdit size={20} title="Alterar coordenador" />}
+              </button>
+            </p>
+
+            {team?.coordinatorId && (
+              <span className={styles.valueCoordinator}>{coodinatorTeam?.name}</span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -151,6 +181,7 @@ export default function TeamPage() {
             <LuUsers />
             <h2>Membros da Equipe</h2>
           </div>
+
 
           <ButtonComponent
             variant="blue"
@@ -258,7 +289,7 @@ export default function TeamPage() {
                         : target.status === "EM ANDAMENTO"
                           ? styles.bgYellow
                           : target.status === "NÃO INICIADA"
-                            ? styles.bgBlue
+                            ? styles.bgGray
                             : styles.bgGray
                         }`}
                     >
@@ -266,13 +297,23 @@ export default function TeamPage() {
                     </span>
                   </td>
                   <td>
-                    <NavLink to={`/view/target/${target.id}`}
-                      /* onClick={() => handleView(target)} */
-                      className={styles.actionButton}
-                      title="Ver detalhes"
-                    >
-                      <FiEye size={16} />
-                    </NavLink>
+                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                      <NavLink to={`/view/target/${target.id}`}
+                        /* onClick={() => handleView(target)} */
+                        className={styles.actionButton}
+                        title="Ver detalhes"
+                      >
+                        <FiEye size={16} />
+                      </NavLink>
+                      <button
+                        onClick={() => handleReallocate(target)}
+                        className={styles.actionButton}
+                        title="Editar"
+                      >
+                        <FiEdit3 size={16} />
+                      </button>
+                    </div>
+
                   </td>
                 </tr>
               ))}
@@ -296,6 +337,27 @@ export default function TeamPage() {
           />
         </div>
       </Modal>
+
+
+      {/* Modal de edição de um alvo */}
+      <Modal isOpen={isModalOpenEditTarget} onClose={() => setIsModalOpenEditTarget(false)}>
+        <EditTargetForm
+          target={selectTargetEdit}
+          onSuccess={() => {
+            alert("Alvo atualizado com sucesso!");
+            //refetchTargets(); // Atualiza a lista
+            //setIsEditing(false);
+          }}
+          onCancel={() => setIsModalOpenEditTarget(false)}
+        />
+      </Modal>
+
+      <AssignCoordinator
+        teamId={Number(id)}
+        isOpen={isModalOpenCoordinator}
+        users={team?.users}
+        onClose={() => setIsModalOpenCoordinator(false)}
+      />
     </div>
   );
 }

@@ -16,12 +16,12 @@
     span{
       display: flex;
       width: 100%;
-      border: 1px solid #4ade80;
+      border: 1px solid oklch(63.7% 0.237 25.331);
       align-items: center;
       border-radius: 5px;
-      background: #dcfce7;
+      background: oklch(93.6% 0.032 17.717);
       padding: 0.5rem 1.5rem;
-      color: #15803d;
+      color: oklch(57.7% 0.245 27.325);
     }
    
   }

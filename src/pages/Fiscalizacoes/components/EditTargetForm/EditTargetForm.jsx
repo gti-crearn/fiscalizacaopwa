@@ -6,6 +6,7 @@ import { DataContext } from "../../../../context/DataContext";
 import { ButtonComponent } from "../../../../components/Button/Button";
 import { MdEdit } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
+import { FiEdit } from "react-icons/fi";
 
 export default function EditTargetForm({ target, onSuccess, onCancel }) {
     const { teams } = useContext(DataContext); // Vem do DataContext
@@ -48,10 +49,10 @@ export default function EditTargetForm({ target, onSuccess, onCancel }) {
                 telefoneProprietario: target.telefoneProprietario || "",
                 enderecoObra: target.enderecoObra || "",
                 capacidadeObra: target.capacidadeObra || "",
-                teamId: target.teamId || "",
+                teamId: target.teamId || null,
                 latitude: target.latitude || "",
                 longitude: target.longitude || "",
-                observacao: target.observacao || "",
+                observacao: target.observacaoART || "",
             });
         }
     }, [target]);
@@ -65,30 +66,30 @@ export default function EditTargetForm({ target, onSuccess, onCancel }) {
         e.preventDefault();
         setError("");
         setLoading(true);
-
         try {
-            // ✅ Converte teamId para número
             const payload = {
-                ...formData,
-                teamId: Number(formData.teamId), // ✅ Força ser número
+              ...formData,
+              teamId: Number(formData.teamId),
             };
-
-            await api.put(`/target/${target.id}`, payload);
-            onSuccess();
-        } catch (err) {
+          
+            await api.put(`/target/${target.id}`, payload);          
+            onSuccess()                   
+            onCancel();
+          
+          } catch (err) {
             const message = err.response?.data?.message || "Erro ao atualizar alvo.";
             setError(message);
             console.error("Erro ao atualizar:", err);
-        } finally {
+          } finally {
             setLoading(false);
-        }
+          }
     };
 
     if (!target) return <p>Carregando dados...</p>;
 
     return (
         <div className={styles.formContainer}>
-            <h2 className={styles.formTitle}>✏️ Editar Alvo</h2>
+            <h2 className={styles.formTitle}><FiEdit size={25} /> Editar Alvo</h2>
 
             {error && <p className={styles.error}>{error}</p>}
 

@@ -19,6 +19,8 @@ export default function TargetDetailPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pendentes, setPendentes] = useState([]);
 
+
+
   // Carrega os dados offline pendentes de sincronização para api
   const carregarPendentes = async () => {
     try {
@@ -26,8 +28,6 @@ export default function TargetDetailPage() {
       setPendentes(lista);
     } catch (err) {
       console.error("Erro ao carregar dados offline:", err);
-    } finally {
-      setLoading(false);
     }
   };
   useEffect(() => {
@@ -126,7 +126,17 @@ export default function TargetDetailPage() {
               {target.status}
             </span>
           </div>
-          <div className={styles.groupButton}>
+          <div className={styles.info}>
+            <label>Observação</label>
+            <p>{target.observacaoART}</p>
+          </div>
+       
+          {pendentes.length > 0 && (
+            <Link to="/view/alvos_pendentes">Alvos pendentes ({pendentes.length}) </Link>
+          )}
+
+        </div>
+        <div className={styles.groupButton}>
             <ButtonComponent
               variant="blue"
               onClick={handleOpenMap}
@@ -136,11 +146,6 @@ export default function TargetDetailPage() {
             </ButtonComponent>
             <ButtonComponent onClick={() => setIsModalOpen(true)} >Fiscalizar </ButtonComponent>
           </div>
-          {pendentes.length > 0 && (
-            <Link to="/view/alvos_pendentes">Alvos pendentes ({pendentes.length}) </Link>
-          )}
-
-        </div>
       </div>
 
       {/* Card de resultados */}
@@ -154,7 +159,7 @@ export default function TargetDetailPage() {
 
         {target.status !== "NÃO INICIADA" && (
           <>
-            {target.targetHistory.map((history) => {
+            {target?.targetHistory.map((history) => {
               return (
                 <div className={styles.grid}>
                   <div className={styles.info}>
@@ -167,7 +172,7 @@ export default function TargetDetailPage() {
                   </div>
                   <div className={styles.info}>
                     <label>Observação</label>
-                    <p>{target.observacao}</p>
+                    <p>{history.observacao}</p>
                   </div>
                   <div className={styles.info}>
                     <label>Status</label>
@@ -185,8 +190,8 @@ export default function TargetDetailPage() {
                   <div className={styles.info}>
                     <label>Anexos</label>
                     <div className={styles.anexos}>
-                      {target.images?.length > 0 ? (
-                        target.images.map((file, index) => {
+                      {history.images?.length > 0 ? (
+                        history.images.map((file, index) => {
                           const filePath = typeof file === "string" ? file : file.url || "";
                           const fileName =
                             typeof file === "string"
