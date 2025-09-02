@@ -1,23 +1,27 @@
 "use client";
 import { useState, useContext, useEffect } from "react";
-import { NavLink  } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { FiEdit3, FiEye, FiRefreshCw } from "react-icons/fi";
 import styles from "./TargetTable.module.css";
 import { DataContext } from "../../../../context/DataContext";
 
 import { formatCNPJ } from "../../../../utils/formatDate";
+import EditTargetForm from "../EditTargetForm/EditTargetForm";
+import { Modal } from "../../../../components/Modal/Modal";
 
 export function TargetTable({ onSelectionChange }) {
   const { targets, filters: contextFilters, setFilters, loading } = useContext(DataContext);
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTargetIds, setSelectedTargetIds] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [selectTargetEdit, setSelectTargetEdit] = useState(null)
   const [localFilters, setLocalFilters] = useState({
     numeroArt: "",
     teamId: "",
     status: "",
   });
 
+  console.log(selectTargetEdit, "Dados para edição")
   // Sincroniza filtros locais com os do contexto
   useEffect(() => {
     setLocalFilters({
@@ -57,10 +61,10 @@ export function TargetTable({ onSelectionChange }) {
   };
 
 
- const handleReallocate = (target) => {
-    // Ex: abrir modal de realocação
-    console.log("Realocar alvo:", target);
-    // Abrir modal ou navegar para formulário
+  const handleReallocate = (target) => {
+    setIsModalOpen(true)
+    setSelectTargetEdit(target)
+
   };
 
   // Extrai equipes únicas dos targets
@@ -147,6 +151,14 @@ export function TargetTable({ onSelectionChange }) {
         </div>
 
       </div>
+
+      {/* Modal de edição de um alvo */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <EditTargetForm
+          target={selectTargetEdit}
+          onCancel={() => setIsModalOpen(false)}
+        />
+      </Modal>
 
       {/* Tabela */}
       <div style={{ overflowX: "auto" }}>
@@ -268,13 +280,13 @@ export function TargetTable({ onSelectionChange }) {
                           <FiEdit3 size={16} />
                         </button>
 
-                        <button
+                        {/* <button
                           onClick={() => handleReallocate(target)}
                           className={styles.actionButton}
                           title="Realocar"
                         >
                           <FiRefreshCw size={16} />
-                        </button>
+                        </button> */}
                       </div>
                     </td>
                   </tr>

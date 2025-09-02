@@ -17,8 +17,6 @@ import { IoCheckmark, IoPause, IoTime } from "react-icons/io5";
 export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { targets, teams, fetchTeams } = useContext(DataContext);
-
-  // ✅ usar query string com react-router
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("q") || "");
 
