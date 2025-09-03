@@ -1,6 +1,6 @@
 // src/components/FiscalizacaoForm.jsx
 "use client";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Camera } from "react-html5-camera-photo";
 import "react-html5-camera-photo/build/css/index.css";
 import { api } from "../../services/api";
@@ -9,15 +9,20 @@ import { ButtonComponent } from "../Button/Button";
 import styles from "./FiscalizacaoForm.module.css";
 import { FaCameraRetro } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
+import FormularioServicos from "../FormularioServicos/FormularioServicos";
+
 
 export function FiscalizacaoForm({ targetId, onClose }) {
   const { user } = useAuth(); // Ajuste: contexto que tem o user
-  console.log(user, "user")
-  const [status, setStatus] = useState("NÃO INICIADA");
+  const [status, setStatus] = useState("");
   const [photos, setPhotos] = useState([]);
   const [observacao, setObservacao] = useState(""); // Novo campo
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isOnline] = useState(navigator.onLine);
+  const [respostas, setRespostas] = useState([]);
+
+
+
 
   // Preview URLs
   const previewUrls = photos.map((file) => URL.createObjectURL(file));
@@ -26,6 +31,7 @@ export function FiscalizacaoForm({ targetId, onClose }) {
     return () => {
       previewUrls.forEach((url) => URL.revokeObjectURL(url));
     };
+
   }, [photos]);
 
   // Captura da câmera
@@ -47,13 +53,26 @@ export function FiscalizacaoForm({ targetId, onClose }) {
     setPhotos((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Enviar para API
   const sendToAPI = async (data) => {
     const formData = new FormData();
     formData.append("status", data.status);
-    formData.append("observacao", data.observacao || ""); // Envia observação
-    formData.append("userId", user?.id); // Envia userId
-    data.photos.forEach((file) => formData.append("files", file));
+    formData.append("observacao", data.observacao || "");
+    formData.append("userId", data.userId);
+
+    // ✅ Envia o checklist como JSON string
+    if (data.checklist && data.checklist.length > 0) {
+      formData.append("checklist", JSON.stringify(data.checklist));
+    }
+
+    // ✅ Reconstrói os arquivos a partir dos blobs
+    if (data.fotos) {
+      data.fotos.forEach((fotoBlob) => {
+        const file = new File([fotoBlob], `photo-${Date.now()}.jpg`, {
+          type: "image/jpeg",
+        });
+        formData.append("files", file);
+      });
+    }
 
     try {
       await api.put(`/target/${data.targetId}/status`, formData, {
@@ -62,8 +81,8 @@ export function FiscalizacaoForm({ targetId, onClose }) {
       await removerFiscalizacaoOffline(data.targetId);
       console.log("✅ Enviado para API:", data.targetId);
     } catch (err) {
-      console.error("❌ Falha ao enviar:", err);
-      await salvarFiscalizacaoOffline(data);
+      console.error("❌ Falha ao enviar para API:", err);
+      // Não re-salva aqui para evitar loop
     }
   };
 
@@ -74,8 +93,19 @@ export function FiscalizacaoForm({ targetId, onClose }) {
 
       const pendentes = await carregarFiscalizacoesOffline();
       for (const item of pendentes) {
+        // ✅ Reconstrói as fotos como blobs
         const fotos = item.fotos.map((f) => new Blob([f.data], { type: f.type }));
-        const data = { ...item, photos: fotos };
+
+        // ✅ Usa todos os campos salvos
+        const data = {
+          targetId: item.targetId,
+          status: item.status,
+          observacao: item.observacao,
+          userId: item.userId,
+          checklist: item.checklist,
+          photos: fotos,
+        };
+
         await sendToAPI(data);
       }
     };
@@ -97,13 +127,17 @@ export function FiscalizacaoForm({ targetId, onClose }) {
       return;
     }
 
+    // ✅ Inclui o checklist (respostas) no formData
     const formData = {
       targetId,
       status,
       photos,
       observacao,
-      userId:user.id, // Incluído
+      userId: user.id,
+      checklist: respostas, // ✅ Array de respostas do FormularioServicos
     };
+
+    console.log("📦 formData completo:", formData); // 🔍 Debug
 
     if (isOnline) {
       await sendToAPI(formData);
@@ -115,8 +149,9 @@ export function FiscalizacaoForm({ targetId, onClose }) {
 
     // Resetar
     setPhotos([]);
-    setStatus("NÃO INICIADA");
+    setStatus("");
     setObservacao("");
+    setRespostas([]); // opcional: limpar respostas
     onClose?.();
   };
 
@@ -131,14 +166,16 @@ export function FiscalizacaoForm({ targetId, onClose }) {
           value={status}
           onChange={(e) => setStatus(e.target.value)}
           className={styles.select}
+          required
         >
+          <option value="">Selecione</option>
           <option value="NÃO INICIADA">NÃO INICIADA</option>
           <option value="EM ANDAMENTO">EM ANDAMENTO</option>
           <option value="CONCLUÍDA">CONCLUÍDA</option>
         </select>
       </div>
 
-
+      <FormularioServicos onRespostasChange={setRespostas} />
       {/* Fotos */}
       <div className={styles.field}>
         <label className={styles.label}>Fotos</label>

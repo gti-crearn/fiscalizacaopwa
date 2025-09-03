@@ -52,7 +52,7 @@ export default function EditTargetForm({ target, onSuccess, onCancel }) {
                 teamId: target.teamId || null,
                 latitude: target.latitude || "",
                 longitude: target.longitude || "",
-                observacao: target.observacaoART || "",
+                observacaoART: target.observacaoART || "",
             });
         }
     }, [target]);

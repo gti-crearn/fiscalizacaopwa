@@ -2,7 +2,7 @@
 import { openDB } from "idb";
 
 const DB_NAME = "fiscalizacao-db";
-const DB_VERSION = 6; // Incrementado
+const DB_VERSION = 7; // Incrementado
 
 async function getDB() {
   return openDB(DB_NAME, DB_VERSION, {
@@ -19,11 +19,14 @@ async function getDB() {
       if (!db.objectStoreNames.contains("teams_detalhados")) {
         db.createObjectStore("teams_detalhados", { keyPath: "id" });
       }
-
-      // ✅ Novo: store para fiscalizações offline
       if (!db.objectStoreNames.contains("fiscalizacoes")) {
         const store = db.createObjectStore("fiscalizacoes", { keyPath: "targetId" });
-        store.createIndex("pendingSync", "pendingSync"); // Para sincronizar depois
+        store.createIndex("pendingSync", "pendingSync");
+      }
+
+      // ✅ NOVO: Store para modelos de checklist (serviços)
+      if (!db.objectStoreNames.contains("servicos")) {
+        db.createObjectStore("servicos", { keyPath: "id" });
       }
     },
   });
@@ -98,7 +101,7 @@ export async function limparTeamDetalhado() {
   await tx.done;
 }
 
-// utils/idb.js
+
 export async function salvarFiscalizacaoOffline(data) {
   const db = await getDB();
 
@@ -112,36 +115,112 @@ export async function salvarFiscalizacaoOffline(data) {
       data: arrayBuffer,
     });
   }
-
+  // ✅ Inclui TUDO necessário para sincronizar depois
   const registro = {
     targetId: data.targetId,
     status: data.status,
+    observacao: data.observacao || "",
+    userId: data.userId,
+    checklist: data.checklist || [], // ✅ checklist incluso
     fotos: fotosBlobs,
     timestamp: Date.now(),
     pendingSync: true,
   };
 
-  // ✅ Abre a transação e faz o put imediatamente
   const tx = db.transaction("fiscalizacoes", "readwrite");
   const store = tx.objectStore("fiscalizacoes");
 
-  // ✅ put() DENTRO da transação ativa
   store.put(registro);
 
-  // ✅ Aguarda a transação terminar
   await tx.done;
 
-  console.log("✅ Fiscalização salva offline:", registro);
+  console.log("✅ Fiscalização salva offline com checklist:", registro);
 }
 
 export async function carregarFiscalizacoesOffline() {
   const db = await getDB();
-  return db.getAll("fiscalizacoes");
+  const todos = await db.getAll("fiscalizacoes");
+  console.log("📥 Dados carregados do IndexedDB:", todos); // debug
+  return todos;
 }
 
 export async function removerFiscalizacaoOffline(targetId) {
   const db = await getDB();
   const tx = db.transaction("fiscalizacoes", "readwrite");
   await tx.objectStore("fiscalizacoes").delete(targetId);
+  await tx.done;
+}
+
+// --- NOVAS FUNÇÕES: Serviços (checklist-modelo) ---
+export async function salvarServicos(servicos) {
+  const db = await getDB();
+  const tx = db.transaction("servicos", "readwrite");
+  const store = tx.objectStore("servicos");
+
+  // 🔁 Extrai todos os serviços, independentemente da estrutura
+  const items = Array.isArray(servicos)
+    ? servicos
+    : Object.values(servicos).flat();
+
+  console.log("🔧 Itens a salvar no IndexedDB:", items);
+
+  for (const s of items) {
+    if (!s) {
+      console.warn("❌ Item nulo/undefined ignorado");
+      continue;
+    }
+
+    if (!s.id) {
+      console.error("❌ Falha: serviço sem id:", s);
+      continue;
+    }
+
+    // ✅ Garante que o id é um valor válido (não string vazia, null, etc)
+    if (!s.id || s.id === "" || s.id === null || s.id === undefined) {
+      console.error("❌ ID inválido encontrado:", s);
+      continue;
+    }
+
+    try {
+      await store.put(s);
+      console.log("✅ Salvo:", s.id, s.servico);
+    } catch (putErr) {
+      console.error("❌ Erro ao salvar no IndexedDB:", putErr, s);
+    }
+  }
+
+  await tx.done;
+  console.log("✅ Todos os serviços salvos com sucesso.");
+}
+
+export async function carregarTodosServicos() {
+  const db = await getDB();
+  const todos = await db.getAll("servicos"); // Isso retorna um array
+
+  // Agrupa por modalidade, garantindo que cada valor seja um array
+  const agrupado = todos.reduce((acc, s) => {
+    const modalidade = s.modalidade;
+
+    if (!modalidade) {
+      console.warn("⚠️ Serviço sem modalidade:", s);
+      return acc;
+    }
+
+    if (!acc[modalidade]) {
+      acc[modalidade] = []; // inicializa como array
+    }
+
+    acc[modalidade].push(s); // adiciona o serviço
+    return acc;
+  }, {});
+
+  // ✅ Garante que o retorno é sempre um objeto com arrays
+  return agrupado;
+}
+
+export async function limparServicos() {
+  const db = await getDB();
+  const tx = db.transaction("servicos", "readwrite");
+  await tx.objectStore("servicos").clear();
   await tx.done;
 }

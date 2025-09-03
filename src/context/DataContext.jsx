@@ -4,9 +4,11 @@ import { api } from "../services/api";
 import { useAuth } from "./AuthContext";
 import {
   carregarTeamDetalhado,
+  carregarTodosServicos,
   carregarTodosTargets,
   carregarTodosTeams,
   carregarTodosUsers,
+  salvarServicos,
   salvarTargets,
   salvarTeamData,
   salvarTeamDetalhado,
@@ -19,9 +21,11 @@ export const DataContext = createContext({
   isOffline: false,
   targets: [],
   teams: [],
+  servicos:null,
   filters: {},
   setFilters: () => {},
   loading: false,
+  fetchServicos: async () => {},
   fetchTargets: async () => {},
   fetchTeams: async () => {
     console.warn("fetchTeams chamado fora do Provider");
@@ -42,11 +46,13 @@ export function DataProvider({ children }) {
   const [teams, setTeams] = useState([]);
   const [filters, setFilters] = useState({});
   const [loading, setLoading] = useState(false);
+  const [servicos, setServicos] = useState();
+
+   
 
   // Busca usuário logado (com fallback offline)
   async function getUser() {
     if (!user?.id) return;
-
     try {
       const { data } = await api.get(`/user/${user.id}`);
       const arr = Array.isArray(data) ? data : [data];
@@ -121,15 +127,16 @@ export function DataProvider({ children }) {
     getUser();
     fetchTeams();
     fetchTargets();
-
-    // Atualiza ao voltar online
+    fetchServicos(); // 👈 adicionado
+  
     const onOnline = () => {
       console.log("🌐 Conexão restaurada. Atualizando dados...");
       getUser();
       fetchTeams();
       fetchTargets();
+      fetchServicos(); // 👈 sincroniza também
     };
-
+  
     window.addEventListener("online", onOnline);
     return () => window.removeEventListener("online", onOnline);
   }, [user?.id]);
@@ -139,16 +146,17 @@ export function DataProvider({ children }) {
     async function carregarOffline() {
       if (targets.length === 0) {
         const offlineTargets = await carregarTodosTargets();
-        if (offlineTargets.length > 0) {
-          setTargets(offlineTargets);
-        }
+        if (offlineTargets.length > 0) setTargets(offlineTargets);
       }
-
+  
       if (teams.length === 0) {
         const offlineTeams = await carregarTodosTeams();
-        if (offlineTeams.length > 0) {
-          setTeams(offlineTeams);
-        }
+        if (offlineTeams.length > 0) setTeams(offlineTeams);
+      }
+  
+      if (servicos.length === 0) { // 👈 novo
+        const offlineServicos = await carregarTodosServicos();
+        if (offlineServicos.length > 0) setServicos(offlineServicos);
       }
     }
     carregarOffline();
@@ -181,11 +189,43 @@ export function DataProvider({ children }) {
     }
   };
 
+  const fetchServicos = async () => {
+  try {
+    const { data } = await api.get("/checklist-modelo");
+    console.log("📦 Dados brutos da API /checklist-modelo:", data);
+
+    // ✅ Verifica se é objeto e tem chaves
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+      console.warn("⚠️ Formato inesperado de dados:", data);
+      return;
+    }
+
+    await salvarServicos(data);
+
+    const offlineData = await carregarTodosServicos();
+    console.log("💾 Dados carregados do IndexedDB:", offlineData);
+
+    setServicos(offlineData);
+    setIsOffline(false);
+  } catch (err) {
+    console.error("❌ Erro ao carregar serviços online:", err);
+    try {
+      const offline = await carregarTodosServicos();
+      console.log("📥 Offline carregado:", offline);
+      setServicos(offline);
+      setIsOffline(true);
+    } catch (dbErr) {
+      console.error("❌ Erro ao carregar offline:", dbErr);
+      setServicos({});
+    }
+  }
+};
   return (
     <DataContext.Provider
       value={{
         userData,
         isOffline,
+        servicos,
         fetchTeams,
         targets,
         teams, // ✅ Adicionado: agora os componentes conseguem acessar
@@ -194,6 +234,7 @@ export function DataProvider({ children }) {
         loading,
         fetchTeamById,
         fetchTargets,
+        fetchServicos,
       }}
     >
       {children}

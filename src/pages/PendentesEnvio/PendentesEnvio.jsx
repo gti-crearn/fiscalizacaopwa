@@ -1,18 +1,16 @@
 // src/components/PendentesPage.jsx
 import React, { useState, useEffect, useContext } from "react";
 import styles from "./PendentesPage.module.css";
-
 import { DataContext } from "../../context/DataContext";
 import { api } from "../../services/api";
 import { carregarFiscalizacoesOffline, removerFiscalizacaoOffline } from "../../services/idb";
 
-
 export default function PendentesPage() {
   const [pendentes, setPendentes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { targets: allTargets } = useContext(DataContext); // Todos os alvos do contexto
+  const { targets: allTargets } = useContext(DataContext);
 
-  // Carrega os dados offline
+  // Carrega os registros offline
   const carregarPendentes = async () => {
     try {
       const lista = await carregarFiscalizacoesOffline();
@@ -29,7 +27,21 @@ export default function PendentesPage() {
     const formData = new FormData();
     formData.append("status", item.status);
 
-    // Converte os blobs em arquivos
+    // ✅ Campos opcionais
+    if (item.observacao) {
+      formData.append("observacao", item.observacao);
+    }
+
+    if (item.userId) {
+      formData.append("userId", item.userId);
+    }
+
+    // ✅ Checklist como JSON string
+    if (item.checklist && Array.isArray(item.checklist) && item.checklist.length > 0) {
+      formData.append("checklist", JSON.stringify(item.checklist));
+    }
+
+    // ✅ Fotos
     item.fotos.forEach((foto) => {
       const blob = new Blob([foto.data], { type: foto.type });
       const file = new File([blob], foto.name || `foto-${item.targetId}-${Date.now()}.jpg`, {
@@ -43,15 +55,15 @@ export default function PendentesPage() {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // Remove do IndexedDB após sucesso
+      // Remove do IndexedDB
       await removerFiscalizacaoOffline(item.targetId);
       console.log(`✅ Enviado para API: targetId=${item.targetId}`);
 
-      // Atualiza a lista local
+      // Atualiza estado local
       setPendentes((prev) => prev.filter((p) => p.targetId !== item.targetId));
     } catch (err) {
       console.error(`❌ Falha ao enviar targetId=${item.targetId}:`, err);
-      throw err;
+      throw err; // Interrompe o loop
     }
   };
 
@@ -74,7 +86,7 @@ export default function PendentesPage() {
     }
   };
 
-  // Carregar dados ao montar
+  // Carregar ao montar
   useEffect(() => {
     carregarPendentes();
   }, []);
@@ -90,7 +102,7 @@ export default function PendentesPage() {
     return () => window.removeEventListener("online", handleOnline);
   }, []);
 
-  // Sincroniza imediatamente se estiver online
+  // Sincronizar imediatamente se já estiver online
   useEffect(() => {
     if (navigator.onLine) {
       sincronizarOffline();
@@ -127,25 +139,21 @@ export default function PendentesPage() {
         Estes registros foram salvos offline e ainda não foram enviados ao servidor.
       </p>
 
-      {pendentes.map((pendente) => {
-        // Busca o target completo do contexto
-        const targetCompleto = allTargets.find(t => t.id === Number(pendente.targetId));
+      {pendentes.map((item) => { // ✅ Aqui é "item", não "pendente"
+        const targetCompleto = allTargets.find(t => t.id === Number(item.targetId));
 
-        // Define classe do status (do pendente)
         let statusClass = styles.statusNaoIniciada;
-        if (pendente.status === "CONCLUÍDA") statusClass = styles.statusConcluida;
-        if (pendente.status === "EM ANDAMENTO") statusClass = styles.statusEmAndamento;
+        if (item.status === "CONCLUÍDA") statusClass = styles.statusConcluida;
+        if (item.status === "EM ANDAMENTO") statusClass = styles.statusEmAndamento;
 
         return (
-          <div key={pendente.targetId} className={styles.card}>
+          <div key={item.targetId} className={styles.card}>
             <div className={styles.cardHeader}>
               <h3 className={styles.cardTitle}>
-                {/* Dados do contexto */}
-                {targetCompleto ? `ART: ${targetCompleto.numeroArt}` : `Alvo #${pendente.targetId}`}
+                {targetCompleto ? `ART: ${targetCompleto.numeroArt}` : `Alvo #${item.targetId}`}
               </h3>
               <span className={`${styles.statusBadge} ${statusClass}`}>
-                {/* Status do pendente (offline) */}
-                {pendente.status}
+                {item.status}
               </span>
             </div>
 
@@ -164,16 +172,27 @@ export default function PendentesPage() {
               </p>
               <p>
                 <strong>Data:</strong>{" "}
-                {new Date(pendente.timestamp).toLocaleString("pt-BR")}
+                {new Date(item.timestamp).toLocaleString("pt-BR")}
               </p>
               <p>
-                <strong>Fotos:</strong> {pendente.fotos.length}
+                <strong>Fotos:</strong> {item.fotos.length}
               </p>
+              {/* ✅ Mostra quantidade de respostas no checklist */}
+              {item.checklist && item.checklist.length > 0 && (
+                <p>
+                  <strong>Checklist:</strong> {item.checklist.length} item(s)
+                </p>
+              )}
+              {item.observacao && (
+                <p>
+                  <strong>Observação:</strong> {item.observacao}
+                </p>
+              )}
             </div>
 
             {/* Miniaturas */}
             <div className={styles.photos}>
-              {pendente.fotos.map((foto, index) => {
+              {item.fotos.map((foto, index) => {
                 const blob = new Blob([foto.data], { type: foto.type });
                 const url = URL.createObjectURL(blob);
                 return (
@@ -182,7 +201,7 @@ export default function PendentesPage() {
                     src={url}
                     alt={`Foto ${index + 1}`}
                     className={styles.photo}
-                    onLoad={() => URL.revokeObjectURL(url)}
+                    onLoad={() => URL.revokeObjectURL(url)} // Limpa memória
                   />
                 );
               })}
@@ -193,11 +212,3 @@ export default function PendentesPage() {
     </div>
   );
 }
-
-// Função auxiliar (adicione no mesmo arquivo ou em idb.js)
-// async function removerFiscalizacaoOffline(targetId) {
-//   const db = await getDB();
-//   const tx = db.transaction("fiscalizacoes", "readwrite");
-//   await tx.objectStore("fiscalizacoes").delete(targetId);
-//   await tx.done;
-// }

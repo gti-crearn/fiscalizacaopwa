@@ -10,6 +10,8 @@ import { FiscalizacaoForm } from "../../components/FiscalizacaoForm/Fiscalizacao
 import { Modal } from "../../components/Modal/Modal";
 import { carregarFiscalizacoesOffline } from "../../services/idb";
 
+
+
 export default function TargetDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -74,6 +76,7 @@ export default function TargetDetailPage() {
       <button onClick={handleBack} className={styles.backButton}>
         ← Voltar
       </button>
+    
       <h1 className={styles.title}>{target?.empresa}</h1>
       <p className={styles.subtitle}>CNPJ:{formatCNPJ(target.cnpj)}</p>
 
@@ -220,6 +223,7 @@ export default function TargetDetailPage() {
           </>
         )}
       </div>
+     
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <FiscalizacaoForm onClose={() => setIsModalOpen(false)} targetId={id} />
       </Modal>
