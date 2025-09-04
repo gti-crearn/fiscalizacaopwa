@@ -96,7 +96,7 @@ export default function TableTarget() {
 
   return (
     <div className={styles.container}>
-     
+
 
       <div className={styles.card}>
         {/* Botão para abrir mapa */}
@@ -230,13 +230,6 @@ export default function TableTarget() {
                             disabled={!isCoordinator && isOnline || !isOnline}
                           >
                             <FiEdit3 size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleReallocate(target)}
-                            className={styles.actionButton}
-                            title="Realocar"
-                          >
-                            <FiRefreshCw size={16} />
                           </button>
                         </div>
                       </td>

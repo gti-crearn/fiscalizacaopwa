@@ -192,3 +192,13 @@
     cursor: not-allowed;
     transform: none;
   }
+
+  .institution{
+    background:oklch(96.2% 0.059 95.617);
+    padding:0.2rem 0.5rem;
+    border-radius: 9999px;
+    color: oklch(68.1% 0.162 75.834);
+  }
+
+
+  

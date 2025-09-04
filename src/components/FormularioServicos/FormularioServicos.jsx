@@ -8,6 +8,8 @@ export default function FormularioServicos({ onRespostasChange }) {
     const [tiposSelecionados, setTiposSelecionados] = useState([]);
     const { servicos } = useContext(DataContext);
 
+    console.log(respostas)
+
   
     useEffect(() => {
         setRespostas((prev) =>

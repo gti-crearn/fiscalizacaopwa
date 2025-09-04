@@ -76,7 +76,7 @@ export default function TargetDetailPage() {
       <button onClick={handleBack} className={styles.backButton}>
         ← Voltar
       </button>
-    
+
       <h1 className={styles.title}>{target?.empresa}</h1>
       <p className={styles.subtitle}>CNPJ:{formatCNPJ(target.cnpj)}</p>
 
@@ -133,22 +133,22 @@ export default function TargetDetailPage() {
             <label>Observação</label>
             <p>{target.observacaoART}</p>
           </div>
-       
+
           {pendentes.length > 0 && (
             <Link to="/view/alvos_pendentes">Alvos pendentes ({pendentes.length}) </Link>
           )}
 
         </div>
         <div className={styles.groupButton}>
-            <ButtonComponent
-              variant="blue"
-              onClick={handleOpenMap}
-              icon={<FiMapPin size={18} />}
-            >
-              Ver no Mapa
-            </ButtonComponent>
-            <ButtonComponent onClick={() => setIsModalOpen(true)} >Fiscalizar </ButtonComponent>
-          </div>
+          <ButtonComponent
+            variant="blue"
+            onClick={handleOpenMap}
+            icon={<FiMapPin size={18} />}
+          >
+            Ver no Mapa
+          </ButtonComponent>
+          <ButtonComponent onClick={() => setIsModalOpen(true)} >Fiscalizar </ButtonComponent>
+        </div>
       </div>
 
       {/* Card de resultados */}
@@ -164,66 +164,105 @@ export default function TargetDetailPage() {
           <>
             {target?.targetHistory.map((history) => {
               return (
-                <div className={styles.grid}>
-                  <div className={styles.info}>
-                    <label>Fiscalizador</label>
-                    <p>{history.name}</p>
-                  </div>
-                  <div className={styles.info}>
-                    <label>Data</label>
-                    <p>{formatDateBR(history.createdAt)}</p>
-                  </div>
-                  <div className={styles.info}>
-                    <label>Observação</label>
-                    <p>{history.observacao}</p>
-                  </div>
-                  <div className={styles.info}>
-                    <label>Status</label>
-                    <span
-                      className={`${styles.statusBadge} ${history.newValue === "CONCLUÍDA"
-                        ? styles.bgGreen
-                        : history.newValue === "EM ANDAMENTO"
-                          ? styles.bgYellow
-                          : styles.bgGray
-                        }`}
-                    >
-                      {history.newValue}
-                    </span>
-                  </div>
-                  <div className={styles.info}>
-                    <label>Anexos</label>
-                    <div className={styles.anexos}>
-                      {history.images?.length > 0 ? (
-                        history.images.map((file, index) => {
-                          const filePath = typeof file === "string" ? file : file.url || "";
-                          const fileName =
-                            typeof file === "string"
-                              ? file.split("/").pop()
-                              : file.name || "arquivo";
-
-                          return (
-                            <div key={index} className={styles.anexo}>
-                              <a href={`${import.meta.env.VITE_API_URL}${filePath}`} rel="noopener noreferrer">
-                                <span className={styles.downloadIcon}> ⬇️ </span>
-                                Baixar Arquivo
-                              </a>
-                              {/*  <span className={styles.fileName}>{fileName}</span> */}
-                            </div>
-                          );
-                        })
-                      ) : (
-                        <span>Nenhum anexo</span>
-                      )}
+                <div className={styles.contentGrid} >
+                  <div className={styles.grid}>
+                    <div className={styles.info}>
+                      <label>Fiscalizador</label>
+                      <p>{history.name}</p>
                     </div>
+                    <div className={styles.info}>
+                      <label>Data</label>
+                      <p>{formatDateBR(history.createdAt)}</p>
+                    </div>
+                    <div className={styles.info}>
+                      <label>Observação</label>
+                      <p>{history.observacao}</p>
+                    </div>
+                    <div className={styles.info}>
+                      <label>Status</label>
+                      <span
+                        className={`${styles.statusBadge} ${history.newValue === "CONCLUÍDA"
+                          ? styles.bgGreen
+                          : history.newValue === "EM ANDAMENTO"
+                            ? styles.bgYellow
+                            : styles.bgGray
+                          }`}
+                      >
+                        {history.newValue}
+                      </span>
+                    </div>
+                    <div className={styles.info}>
+                      <label>Anexos</label>
+                      <div className={styles.anexos}>
+                        {history.images?.length > 0 ? (
+                          history.images.map((file, index) => {
+                            const filePath = typeof file === "string" ? file : file.url || "";
+                            const fileName =
+                              typeof file === "string"
+                                ? file.split("/").pop()
+                                : file.name || "arquivo";
+
+                            return (
+                              <div key={index} className={styles.anexo}>
+                                <a href={`${import.meta.env.VITE_API_URL}${filePath}`} rel="noopener noreferrer">
+                                  <span className={styles.downloadIcon}> ⬇️ </span>
+                                  Baixar Arquivo
+                                </a>
+                                {/*  <span className={styles.fileName}>{fileName}</span> */}
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <span>Nenhum anexo</span>
+                        )}
+                      </div>
+                    </div>
+
+                  </div>
+                  {/* Checklists - Dados Estruturados */}
+                  <div className={styles.info}>
+                    <label>Checklists</label>
+                    {history.checklists && history.checklists.length > 0 ? (
+                      <table className={styles.checklistTable}>
+                        <thead>
+                          <tr>
+                            <th>Serviço</th>
+                            <th>ART</th>
+                            <th>Empresa</th>
+                            <th>Profissional</th>
+                            <th>CNPJ</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {history.checklists.map((item) => (
+                            <tr key={item.id}>
+                             
+                              <td>
+                                <div style={{ fontWeight: 500 }}>{item.servico}</div>
+                                <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>{item?.tipo} - {item?.modalidade}</div>
+                              </td>
+
+                              <td>{item.art || "-"}</td>
+                              <td>{item.nomeEmpresa || "-"}</td>
+                              <td>{item.nomeProfissional || "-"}</td>
+                              <td>{item.cnpj ? formatCNPJ(item.cnpj) : "-"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <span>Nenhum checklist registrado.</span>
+                    )}
                   </div>
                 </div>
+
               )
             })
             }
           </>
         )}
       </div>
-     
+
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <FiscalizacaoForm onClose={() => setIsModalOpen(false)} targetId={id} />
       </Modal>

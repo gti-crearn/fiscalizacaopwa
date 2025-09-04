@@ -29,7 +29,7 @@ export default function TeamPage() {
   const [isModalOpenCoordinator, setIsModalOpenCoordinator] = useState(false);
   const [selectTargetEdit, setSelectTargetEdit] = useState(null)
 
-  console.log(selectTargetEdit)
+  console.log(team)
 
   const handleCancel = () => {
     setIsModalOpen(false);
@@ -197,6 +197,7 @@ export default function TeamPage() {
             <thead>
               <tr>
                 <th>Nome</th>
+                <th>Órgão</th>
                 <th>Tipo</th>
                 <th>Email</th>
                 <th>Criado em</th>
@@ -215,6 +216,13 @@ export default function TeamPage() {
                     <td style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                       <FaRegUser />
                       {user.name} ({user.username})
+                    </td>
+                    <td style={{ fontSize: "0.75rem" }}>
+                      {user?.institutions.length > 0 ? (
+                        <span className={styles.institution}
+                        >  {user?.institutions[0]?.acronym}</span>
+                      ) : "-"}
+
                     </td>
                     <td>
                       <span
