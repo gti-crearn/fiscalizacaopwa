@@ -7,9 +7,8 @@ export default function FormularioServicos({ onRespostasChange }) {
     const [respostas, setRespostas] = useState([]);
     const [tiposSelecionados, setTiposSelecionados] = useState([]);
     const { servicos } = useContext(DataContext);
-   
-    console.log(servicos, "sbfhsfdb")
-    
+
+  
     useEffect(() => {
         setRespostas((prev) =>
             prev.filter((r) => tiposSelecionados.includes(r.tipo))
@@ -19,29 +18,29 @@ export default function FormularioServicos({ onRespostasChange }) {
     // Atualiza respostas + envia para o pai
     useEffect(() => {
         if (onRespostasChange) {
-          onRespostasChange(respostas);
+            onRespostasChange(respostas);
         }
-      }, [respostas, onRespostasChange]);
+    }, [respostas, onRespostasChange]);
 
     // 🔧 Agora armazenando também o tipo
     const handleChange = (servico, tipo, modalidade, field, value) => {
         setRespostas((prev) => {
-          // Encontra se já existe uma resposta para esse serviço NA MESMA MODALIDADE
-          const existente = prev.find(
-            (r) => r.servico === servico && r.modalidade === modalidade
-          );
-      
-          if (existente) {
-            return prev.map((r) =>
-              r.servico === servico && r.modalidade === modalidade
-                ? { ...r, [field]: value, tipo, modalidade }
-                : r
+            // Encontra se já existe uma resposta para esse serviço NA MESMA MODALIDADE
+            const existente = prev.find(
+                (r) => r.servico === servico && r.modalidade === modalidade
             );
-          }
-      
-          return [...prev, { servico, tipo, modalidade, [field]: value }];
+
+            if (existente) {
+                return prev.map((r) =>
+                    r.servico === servico && r.modalidade === modalidade
+                        ? { ...r, [field]: value, tipo, modalidade }
+                        : r
+                );
+            }
+
+            return [...prev, { servico, tipo, modalidade, [field]: value }];
         });
-      };
+    };
     // Checkboxes (mas com comportamento de "um só marcado")
     const toggleTipo = (tipo) => {
         setTiposSelecionados((prev) =>
@@ -53,22 +52,25 @@ export default function FormularioServicos({ onRespostasChange }) {
         <div className={styles.container}>
             {/* Filtros */}
             <div className={styles.filtros}>
-                <label>
-                    <input
-                        type="checkbox"
-                        checked={tiposSelecionados.includes("Eólica")}
-                        onChange={() => toggleTipo("Eólica")}
-                    />
-                    Eólica
-                </label>
-                <label>
-                    <input
-                        type="checkbox"
-                        checked={tiposSelecionados.includes("Fotovoltaica")}
-                        onChange={() => toggleTipo("Fotovoltaica")}
-                    />
-                    Fotovoltaica
-                </label>
+                Tipo de empreendimento
+                <div className={styles.filtrosTipoGroup}>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={tiposSelecionados.includes("Eólica")}
+                            onChange={() => toggleTipo("Eólica")}
+                        />
+                        Eólica
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={tiposSelecionados.includes("Fotovoltaica")}
+                            onChange={() => toggleTipo("Fotovoltaica")}
+                        />
+                        Fotovoltaica
+                    </label>
+                </div>
             </div>
 
             {/* Lista de serviços */}
@@ -92,7 +94,7 @@ export default function FormularioServicos({ onRespostasChange }) {
                                             {/* Radios Aplica-se */}
                                             <label className={styles.radioGroup}>
                                                 Aplica-se:
-                                                <div>
+                                                <div className={styles.radios}>
                                                     <label>
                                                         <input
                                                             type="radio"
@@ -127,7 +129,7 @@ export default function FormularioServicos({ onRespostasChange }) {
                                             {/* Só mostra os outros campos se Aplica-se = true */}
                                             {respostaAtual?.aplicaSe && (
                                                 <>
-                                                    <label>
+                                                    <label className={styles.labelInputs}>
                                                         ART:
                                                         <input
                                                             type="text"
@@ -138,7 +140,7 @@ export default function FormularioServicos({ onRespostasChange }) {
                                                         />
                                                     </label>
 
-                                                    <label>
+                                                    <label className={styles.labelInputs} >
                                                         Empresa:
                                                         <input
                                                             type="text"
@@ -149,7 +151,7 @@ export default function FormularioServicos({ onRespostasChange }) {
                                                         />
                                                     </label>
 
-                                                    <label>
+                                                    <label className={styles.labelInputs}>
                                                         Nome do Profissional:
                                                         <input
                                                             type="text"
@@ -160,7 +162,7 @@ export default function FormularioServicos({ onRespostasChange }) {
                                                         />
                                                     </label>
 
-                                                    <label>
+                                                    <label className={styles.labelInputs}>
                                                         CNPJ:
                                                         <input
                                                             type="text"
@@ -172,7 +174,7 @@ export default function FormularioServicos({ onRespostasChange }) {
                                                         />
                                                     </label>
 
-                                                    <label>
+                                                    <label className={styles.labelInputs}>
                                                         CPF:
                                                         <input
                                                             type="text"
@@ -184,7 +186,7 @@ export default function FormularioServicos({ onRespostasChange }) {
                                                         />
                                                     </label>
 
-                                                    <label>
+                                                    <label className={styles.labelInputs}>
                                                         Telefone:
                                                         <input
                                                             type="text"
@@ -196,7 +198,7 @@ export default function FormularioServicos({ onRespostasChange }) {
                                                         />
                                                     </label>
 
-                                                    <label>
+                                                    <label className={styles.labelInputs}>
                                                         Email:
                                                         <input
                                                             type="email"
@@ -216,11 +218,11 @@ export default function FormularioServicos({ onRespostasChange }) {
                 ))}
 
             {/* Debug */}
-            {tiposSelecionados.length > 0 && (
+            {/*       {tiposSelecionados.length > 0 && (
                 <pre className={styles.debug}>
                     {JSON.stringify(respostas, null, 2)}
                 </pre>
-            )}
+            )} */}
         </div>
     );
 }

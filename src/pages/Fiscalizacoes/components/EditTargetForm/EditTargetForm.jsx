@@ -70,9 +70,9 @@ export default function EditTargetForm({ target, onSuccess, onCancel }) {
             const payload = {
               ...formData,
               teamId: Number(formData.teamId),
-            };
-          
-            await api.put(`/target/${target.id}`, payload);          
+            };          
+            await api.put(`/target/${target.id}`, payload);    
+            window.location.reload()   
             onSuccess()                   
             onCancel();
           

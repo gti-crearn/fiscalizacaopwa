@@ -22,8 +22,6 @@ export function FiscalizacaoForm({ targetId, onClose }) {
   const [respostas, setRespostas] = useState([]);
 
 
-
-
   // Preview URLs
   const previewUrls = photos.map((file) => URL.createObjectURL(file));
 
@@ -58,58 +56,57 @@ export function FiscalizacaoForm({ targetId, onClose }) {
     formData.append("status", data.status);
     formData.append("observacao", data.observacao || "");
     formData.append("userId", data.userId);
-
+  
     // ✅ Envia o checklist como JSON string
-    if (data.checklist && data.checklist.length > 0) {
+    if (data.checklist && Array.isArray(data.checklist) && data.checklist.length > 0) {
       formData.append("checklist", JSON.stringify(data.checklist));
     }
-
-    // ✅ Reconstrói os arquivos a partir dos blobs
-    if (data.fotos) {
-      data.fotos.forEach((fotoBlob) => {
-        const file = new File([fotoBlob], `photo-${Date.now()}.jpg`, {
+  
+    // ✅ CORRIGIDO: use `photos`, não `fotos`
+    if (data.photos) {
+      data.photos.forEach((photoBlob) => {
+        const file = new File([photoBlob], `photo-${Date.now()}.jpg`, {
           type: "image/jpeg",
         });
         formData.append("files", file);
       });
     }
-
+  
     try {
       await api.put(`/target/${data.targetId}/status`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       await removerFiscalizacaoOffline(data.targetId);
-      console.log("✅ Enviado para API:", data.targetId);
+      window.location.reload()
+     
     } catch (err) {
       console.error("❌ Falha ao enviar para API:", err);
-      // Não re-salva aqui para evitar loop
     }
   };
-
   // Sincronizar ao ficar online
   React.useEffect(() => {
     const syncPending = async () => {
       if (!isOnline) return;
-
+  
       const pendentes = await carregarFiscalizacoesOffline();
       for (const item of pendentes) {
         // ✅ Reconstrói as fotos como blobs
         const fotos = item.fotos.map((f) => new Blob([f.data], { type: f.type }));
-
-        // ✅ Usa todos os campos salvos
+  
+        // ✅ CORRIGIDO: use `photos`, não `fotos`
         const data = {
           targetId: item.targetId,
           status: item.status,
           observacao: item.observacao,
           userId: item.userId,
           checklist: item.checklist,
-          photos: fotos,
+          photos: fotos, // ✅ nome correto: `photos`
         };
-
+  
         await sendToAPI(data);
       }
     };
-
+  
     syncPending();
   }, [isOnline]);
 
@@ -131,13 +128,11 @@ export function FiscalizacaoForm({ targetId, onClose }) {
     const formData = {
       targetId,
       status,
-      photos,
+      photos, // ✅ correto: `photos`
       observacao,
       userId: user.id,
-      checklist: respostas, // ✅ Array de respostas do FormularioServicos
-    };
-
-    console.log("📦 formData completo:", formData); // 🔍 Debug
+      checklist: respostas,
+    };  
 
     if (isOnline) {
       await sendToAPI(formData);
@@ -145,6 +140,7 @@ export function FiscalizacaoForm({ targetId, onClose }) {
     } else {
       await salvarFiscalizacaoOffline(formData);
       alert("Dados salvos offline. Serão enviados quando estiver online.");
+      window.location.reload()
     }
 
     // Resetar
@@ -159,36 +155,20 @@ export function FiscalizacaoForm({ targetId, onClose }) {
     <form onSubmit={handleSubmit} className={styles.container}>
       <h2 className={styles.title}>Atualizar Fiscalização #{targetId}</h2>
 
-      {/* Status */}
-      <div className={styles.field}>
-        <label className={styles.label}>Status</label>
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className={styles.select}
-          required
-        >
-          <option value="">Selecione</option>
-          <option value="NÃO INICIADA">NÃO INICIADA</option>
-          <option value="EM ANDAMENTO">EM ANDAMENTO</option>
-          <option value="CONCLUÍDA">CONCLUÍDA</option>
-        </select>
-      </div>
-
       <FormularioServicos onRespostasChange={setRespostas} />
       {/* Fotos */}
       <div className={styles.field}>
-        <label className={styles.label}>Fotos</label>
+        <label className={styles.label}>Imagens (Adicione fotos a fiscalização) </label>
 
         {/* Câmera */}
         {!isCameraOpen ? (
-          <button
+          <ButtonComponent
             type="button"
             onClick={() => setIsCameraOpen(true)}
-            className={styles.buttonCamera}
+            variant="blue"
           >
             <FaCameraRetro size={16} /> Abrir Câmera
-          </button>
+          </ButtonComponent>
         ) : (
           <div className={styles.cameraContainer}>
             <Camera
@@ -196,13 +176,13 @@ export function FiscalizacaoForm({ targetId, onClose }) {
               idealFacingMode="environment"
               isImageMirror={false}
             />
-            <button
+            <ButtonComponent
               type="button"
               onClick={() => setIsCameraOpen(false)}
-              className={styles.buttonClose}
+              variant="red"
             >
               ❌ Fechar Câmera
-            </button>
+            </ButtonComponent>
           </div>
         )}
 
@@ -223,6 +203,22 @@ export function FiscalizacaoForm({ targetId, onClose }) {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Status */}
+      <div className={styles.field}>
+        <label className={styles.label}>Status</label>
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className={styles.select}
+          required
+        >
+          <option value="">Selecione</option>
+          <option value="NÃO INICIADA">NÃO INICIADA</option>
+          <option value="EM ANDAMENTO">EM ANDAMENTO</option>
+          <option value="CONCLUÍDA">CONCLUÍDA</option>
+        </select>
       </div>
 
       {/* Observação */}
