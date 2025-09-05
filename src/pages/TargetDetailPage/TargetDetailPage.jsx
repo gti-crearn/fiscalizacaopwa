@@ -220,36 +220,45 @@ export default function TargetDetailPage() {
 
                   </div>
                   {/* Checklists - Dados Estruturados */}
+                  {/* Checklists - Dados Estruturados */}
                   <div className={styles.info}>
                     <label>Checklists</label>
                     {history.checklists && history.checklists.length > 0 ? (
-                      <table className={styles.checklistTable}>
-                        <thead>
-                          <tr>
-                            <th>Serviço</th>
-                            <th>ART</th>
-                            <th>Empresa</th>
-                            <th>Profissional</th>
-                            <th>CNPJ</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {history.checklists.map((item) => (
-                            <tr key={item.id}>
-                             
-                              <td>
-                                <div style={{ fontWeight: 500 }}>{item.servico}</div>
-                                <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>{item?.tipo} - {item?.modalidade}</div>
-                              </td>
-
-                              <td>{item.art || "-"}</td>
-                              <td>{item.nomeEmpresa || "-"}</td>
-                              <td>{item.nomeProfissional || "-"}</td>
-                              <td>{item.cnpj ? formatCNPJ(item.cnpj) : "-"}</td>
+                      <div className={styles.tableContainer}>
+                        <table className={styles.checklistTable}>
+                          <thead>
+                            <tr>
+                              <th>Serviço</th>
+                              <th>ART</th>
+                              <th>Empresa</th>
+                              <th>Profissional</th>
+                              <th>CNPJ</th>
+                              <th>CPF</th>
+                              <th>Telefone</th>
+                              <th>Email</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {history.checklists.map((item) => (
+                              <tr key={item.id}>
+                                <td>
+                                  <div style={{ fontWeight: 500 }}>{item.servico}</div>
+                                  <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                                    {item.tipo} - {item.modalidade}
+                                  </div>
+                                </td>
+                                <td>{item.art || "-"}</td>
+                                <td>{item.nomeEmpresa || "-"}</td>
+                                <td>{item.nomeProfissional || "-"}</td>
+                                <td>{item.cnpj ? formatCNPJ(item.cnpj) : "-"}</td>
+                                <td>{item.cpf || "-"}</td>
+                                <td>{item.telefone || "-"}</td>
+                                <td>{item.email || "-"}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     ) : (
                       <span>Nenhum checklist registrado.</span>
                     )}

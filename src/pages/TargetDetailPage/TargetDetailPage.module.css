@@ -34,6 +34,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  overflow: hidden;
 
   label {
     font-weight: 600;
@@ -238,4 +239,72 @@
   border-radius: 12px;
   font-size: 0.8rem;
   font-weight: 500;
+}
+
+
+/* Tabela de Checklist */
+.checklistTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+  margin-top: 8px;
+}
+
+.checklistTable th {
+  background: #2563eb;
+  color: white;
+  text-align: left;
+  padding: 12px 14px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.checklistTable td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+.checklistTable tbody tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+.checklistTable tbody tr:hover {
+  background-color: #f1f5f9;
+  transition: background-color 0.2s ease;
+}
+
+.checklistTable td:first-child {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+/* Container com scroll horizontal para a tabela */
+.tableContainer {
+  overflow-x: auto;
+  margin-top: 12px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tableContainer::-webkit-scrollbar {
+  height: 8px;
+}
+
+.tableContainer::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.tableContainer::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.tableContainer::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
