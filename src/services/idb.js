@@ -47,9 +47,15 @@ export async function salvarTeamData(teams) {
   const db = await getDB();
   const tx = db.transaction("teams", "readwrite");
   const store = tx.objectStore("teams");
-  for (const u of arr) await store.put(u);
+
+  await store.clear(); // 🔑 Limpa antes de inserir
+
+  for (const t of arr) {
+    await store.put(t);
+  }
   await tx.done;
 }
+
 
 export async function carregarTodosTeams() {
   const db = await getDB();
@@ -66,10 +72,15 @@ export async function salvarTargets(targets) {
   const db = await getDB();
   const tx = db.transaction("targets", "readwrite");
   const store = tx.objectStore("targets");
-  for (const t of arr) await store.put(t);
+
+  // 🧹 Limpa antes de salvar
+  await store.clear();
+
+  for (const t of arr) {
+    await store.put(t);
+  }
   await tx.done;
 }
-
 export async function carregarTodosTargets() {
   const db = await getDB();
   return db.getAll("targets");

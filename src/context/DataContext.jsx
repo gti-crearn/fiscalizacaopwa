@@ -127,7 +127,7 @@ export function DataProvider({ children }) {
     getUser();
     fetchTeams();
     fetchTargets();
-    fetchServicos(); // 👈 adicionado
+    fetchServicos(); 
   
     const onOnline = () => {
       console.log("🌐 Conexão restaurada. Atualizando dados...");
@@ -139,7 +139,7 @@ export function DataProvider({ children }) {
   
     window.addEventListener("online", onOnline);
     return () => window.removeEventListener("online", onOnline);
-  }, [user?.id]);
+  }, [user]);
 
   // Carregar dados offline ao montar (se ainda não carregou)
   useEffect(() => {
