@@ -11,6 +11,7 @@
 }
 
 .filtros label {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -28,14 +29,11 @@
 
 .filtrosTipoGroup{
   display: flex;
-  align-items: center;
-  
+  align-items: center; 
   
 }
 
-.filtros label input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+.filtros label input[type="checkbox"] { 
   accent-color: #2563eb;
 }
 
@@ -135,6 +133,7 @@
 /* Radio Group */
 .radioGroup {
   display: flex;
+  align-items: start;
   flex-direction: column;
   gap: 6px;
 }
@@ -183,4 +182,45 @@
   display: flex;
   flex-direction: column;
   font-size: 1rem;
+}
+
+/* Responsividade para mobile */
+@media (max-width: 768px) {
+  .formGrid {
+    grid-template-columns: 1fr; /* Uma única coluna em mobile */
+    gap: 12px;
+  }
+
+  .servicoCard {
+    margin: 12px;
+    padding: 16px;
+  }
+
+  .servicoTitulo {
+    font-size: 1.1rem;
+  }
+
+  .tipoTag {
+    font-size: 0.75rem;
+  }
+
+  .radioGroup div {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .radios {
+    flex-direction: column;
+  }
+
+  .radioGroup label {
+    justify-content: flex-start;
+  }
+}
+
+/* Garantir que os inputs ocupem 100% da largura do container */
+.formGrid input,
+.formGrid select {
+  width: 100%;
+  box-sizing: border-box;
 }

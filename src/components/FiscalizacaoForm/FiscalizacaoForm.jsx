@@ -153,7 +153,7 @@ export function FiscalizacaoForm({ targetId, onClose }) {
 
   return (
     <form onSubmit={handleSubmit} className={styles.container}>
-      <h2 className={styles.title}>Atualizar Fiscalização #{targetId}</h2>
+      <h2 className={styles.title}>Fiscalizar Alvo #{targetId}</h2>
 
       <FormularioServicos onRespostasChange={setRespostas} />
       {/* Fotos */}
@@ -215,7 +215,7 @@ export function FiscalizacaoForm({ targetId, onClose }) {
           required
         >
           <option value="">Selecione</option>
-          <option value="NÃO INICIADA">NÃO INICIADA</option>
+          {/* <option value="NÃO INICIADA">NÃO INICIADA</option> */}
           <option value="EM ANDAMENTO">EM ANDAMENTO</option>
           <option value="CONCLUÍDA">CONCLUÍDA</option>
         </select>

@@ -10,7 +10,7 @@ export default function FormularioServicos({ onRespostasChange }) {
 
     console.log(respostas)
 
-  
+
     useEffect(() => {
         setRespostas((prev) =>
             prev.filter((r) => tiposSelecionados.includes(r.tipo))
@@ -89,7 +89,7 @@ export default function FormularioServicos({ onRespostasChange }) {
                                 return (
                                     <div key={s.id} className={styles.servicoCard}>
                                         <h3 className={styles.servicoTitulo}>
-                                            {s.servico} <span className={styles.tipoTag}>({s.tipo})</span>
+                                            {s.servico} 
                                         </h3>
 
                                         <div className={styles.formGrid}>
@@ -135,6 +135,7 @@ export default function FormularioServicos({ onRespostasChange }) {
                                                         ART:
                                                         <input
                                                             type="text"
+                                                            placeholder="Nº da ART"
                                                             value={respostaAtual?.art || ""}
                                                             onChange={(e) =>
                                                                 handleChange(s.servico, s.tipo, modalidade, "art", e.target.value)
@@ -146,6 +147,7 @@ export default function FormularioServicos({ onRespostasChange }) {
                                                         Empresa:
                                                         <input
                                                             type="text"
+                                                            placeholder="Nome da empresa"
                                                             value={respostaAtual?.nomeEmpresa || ""}
                                                             onChange={(e) =>
                                                                 handleChange(s.servico, s.tipo, modalidade, "nomeEmpresa", e.target.value)
@@ -157,6 +159,7 @@ export default function FormularioServicos({ onRespostasChange }) {
                                                         Nome do Profissional:
                                                         <input
                                                             type="text"
+                                                            placeholder="Nome do profissional"
                                                             value={respostaAtual?.nomeProfissional || ""}
                                                             onChange={(e) =>
                                                                 handleChange(s.servico, s.tipo, modalidade, "nomeProfissional", e.target.value)
@@ -168,7 +171,7 @@ export default function FormularioServicos({ onRespostasChange }) {
                                                         CNPJ:
                                                         <input
                                                             type="text"
-                                                            placeholder="CNPJ"
+                                                            placeholder="00.000.000/0000-00"
                                                             value={respostaAtual?.cnpj || ""}
                                                             onChange={(e) =>
                                                                 handleChange(s.servico, s.tipo, modalidade, "cnpj", maskCNPJ(e.target.value))
@@ -180,7 +183,7 @@ export default function FormularioServicos({ onRespostasChange }) {
                                                         CPF:
                                                         <input
                                                             type="text"
-                                                            placeholder="CPF"
+                                                            placeholder="000.000.000-00"
                                                             value={respostaAtual?.cpf || ""}
                                                             onChange={(e) =>
                                                                 handleChange(s.servico, s.tipo, modalidade, "cpf", maskCPF(e.target.value))
@@ -192,7 +195,7 @@ export default function FormularioServicos({ onRespostasChange }) {
                                                         Telefone:
                                                         <input
                                                             type="text"
-                                                            placeholder="Telefone"
+                                                            placeholder="(00) 0000-0000"
                                                             value={respostaAtual?.telefone || ""}
                                                             onChange={(e) =>
                                                                 handleChange(s.servico, s.tipo, modalidade, "telefone", maskTelefone(e.target.value))
@@ -204,6 +207,7 @@ export default function FormularioServicos({ onRespostasChange }) {
                                                         Email:
                                                         <input
                                                             type="email"
+                                                            placeholder="email@email.com"
                                                             value={respostaAtual?.email || ""}
                                                             onChange={(e) =>
                                                                 handleChange(s.servico, s.tipo, modalidade, "email", e.target.value)
