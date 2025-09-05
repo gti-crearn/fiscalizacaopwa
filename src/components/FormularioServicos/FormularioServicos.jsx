@@ -3,7 +3,7 @@ import styles from "./FormularioServicos.module.css";
 import { maskCNPJ, maskCPF, maskTelefone } from "../../utils/mask";
 import { DataContext } from "../../context/DataContext";
 
-export default function FormularioServicos({ onRespostasChange }) {
+export default function FormularioServicos({ onRespostasChange, onTipoSelecionado } ) {
     const [respostas, setRespostas] = useState([]);
     const [tiposSelecionados, setTiposSelecionados] = useState([]);
     const { servicos } = useContext(DataContext);
@@ -31,7 +31,14 @@ export default function FormularioServicos({ onRespostasChange }) {
             const existente = prev.find(
                 (r) => r.servico === servico && r.modalidade === modalidade
             );
-
+    
+            // Se for o campo "aplicaSe" e o valor for false → REMOVER do array
+            if (field === "aplicaSe" && value === false) {
+                return prev.filter(
+                    (r) => !(r.servico === servico && r.modalidade === modalidade)
+                );
+            }
+    
             if (existente) {
                 return prev.map((r) =>
                     r.servico === servico && r.modalidade === modalidade
@@ -39,16 +46,21 @@ export default function FormularioServicos({ onRespostasChange }) {
                         : r
                 );
             }
-
+    
+            // Se for "aplicaSe: true", adiciona o item (mesmo que ainda não exista)
             return [...prev, { servico, tipo, modalidade, [field]: value }];
         });
     };
     // Checkboxes (mas com comportamento de "um só marcado")
     const toggleTipo = (tipo) => {
-        setTiposSelecionados((prev) =>
-            prev.includes(tipo) ? [] : [tipo]
-        );
-    };
+        const novosTipos = tiposSelecionados.includes(tipo) ? [] : [tipo];
+        setTiposSelecionados(novosTipos);
+    
+        // 👇 Notifica o componente pai
+        if (onTipoSelecionado) {
+          onTipoSelecionado(novosTipos.length > 0); // true se algum tipo estiver selecionado
+        }
+      };
 
     return (
         <div className={styles.container}>

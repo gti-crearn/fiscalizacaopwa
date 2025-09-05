@@ -21,6 +21,8 @@ export const DataContext = createContext({
   isOffline: false,
   targets: [],
   teams: [],
+  isOffline:null,
+  isOnline:null,
   servicos:null,
   filters: {},
   setFilters: () => {},
@@ -48,7 +50,19 @@ export function DataProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [servicos, setServicos] = useState();
 
-   
+  
+  const [isOnline, setIsOnline] = useState(navigator.onLine); // 👈 novo estado
+
+// Efeito para monitorar conexão
+useEffect(() => {
+  const updateStatus = () => setIsOnline(navigator.onLine);
+  window.addEventListener("online", updateStatus);
+  window.addEventListener("offline", updateStatus);
+  return () => {
+    window.removeEventListener("online", updateStatus);
+    window.removeEventListener("offline", updateStatus);
+  };
+}, []);
 
   // Busca usuário logado (com fallback offline)
   async function getUser() {
@@ -226,6 +240,7 @@ export function DataProvider({ children }) {
         userData,
         isOffline,
         servicos,
+        isOnline,
         fetchTeams,
         targets,
         teams, // ✅ Adicionado: agora os componentes conseguem acessar

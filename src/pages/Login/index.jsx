@@ -1,15 +1,17 @@
 // src/components/Login.js
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import styles from './Login.module.css';
 import { LogIn } from 'lucide-react';
 
 import { useNavigate } from 'react-router-dom'; // Opcional: para redirecionar após login
 import { useAuth } from '../../context/AuthContext';
+import { DataContext } from '../../context/DataContext';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login, error, loading } = useAuth();
+  const { isOnline } = useContext(DataContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -31,6 +33,9 @@ const Login = () => {
 
         {/* Exibe erro se houver */}
         {error && <div className={styles.errorMessage}>{error}</div>}
+        <div className={`status-bar ${isOnline ? "online" : "offline"}`} style={{marginTop:"1rem",marginBottom:"1rem"}}>
+          {isOnline ? "🟢 Conectado" : "🔴 Sem conexão, precisa está conectado"}
+        </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.inputGroup}>

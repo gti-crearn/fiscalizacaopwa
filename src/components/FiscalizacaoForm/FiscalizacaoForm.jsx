@@ -1,6 +1,6 @@
 // src/components/FiscalizacaoForm.jsx
 "use client";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { Camera } from "react-html5-camera-photo";
 import "react-html5-camera-photo/build/css/index.css";
 import { api } from "../../services/api";
@@ -12,6 +12,7 @@ import { useAuth } from "../../context/AuthContext";
 import FormularioServicos from "../FormularioServicos/FormularioServicos";
 
 
+
 export function FiscalizacaoForm({ targetId, onClose }) {
   const { user } = useAuth(); // Ajuste: contexto que tem o user
   const [status, setStatus] = useState("");
@@ -20,6 +21,7 @@ export function FiscalizacaoForm({ targetId, onClose }) {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isOnline] = useState(navigator.onLine);
   const [respostas, setRespostas] = useState([]);
+  const [tipoSelecionado, setTipoSelecionado] = useState(false);
 
 
   // Preview URLs
@@ -155,7 +157,7 @@ export function FiscalizacaoForm({ targetId, onClose }) {
     <form onSubmit={handleSubmit} className={styles.container}>
       <h2 className={styles.title}>Fiscalizar Alvo #{targetId}</h2>
 
-      <FormularioServicos onRespostasChange={setRespostas} />
+      <FormularioServicos onRespostasChange={setRespostas}  onTipoSelecionado={setTipoSelecionado} />
       {/* Fotos */}
       <div className={styles.field}>
         <label className={styles.label}>Imagens (Adicione fotos a fiscalização) </label>
@@ -241,7 +243,8 @@ export function FiscalizacaoForm({ targetId, onClose }) {
         <ButtonComponent
           variant="green"
           type="submit"
-          disabled={photos.length === 0}
+          disabled={!tipoSelecionado}
+          title={!tipoSelecionado ? "Selecione o tipo de empreendimento (Eólica ou Fotovoltaica)" : ""}
         >
           Salvar Atualização
         </ButtonComponent>
